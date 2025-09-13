@@ -89,8 +89,8 @@ export default function FileUpload() {
     <div className="min-h-screen bg-gradient-secondary px-4 py-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <h1 className="bg-gradient-primary bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">File Upload Portal</h1>
-          <p className="mt-4 text-lg text-muted-foreground">Upload your .txt and .pdf files with ease</p>
+          <h1 className="bg-gradient-primary bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">Cloud Quiz</h1>
+          <p className="mt-4 text-lg text-muted-foreground">Upload your .txt and .pdf note files with ease, to prepare for those finals!</p>
         </div>
 
         <div
