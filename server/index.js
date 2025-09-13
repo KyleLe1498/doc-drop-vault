@@ -7,8 +7,11 @@ const multer = require("multer");
 const app = express();
 const PORT = 3001;
 
-// Allow your Vite dev server (usually 5173) to call this API
-app.use(cors({ origin: "http://localhost:5173" }));
+// Allow both Lovable preview (8080) and local Vite dev server (5173) to call this API
+app.use(cors({ 
+  origin: ["http://localhost:5173", "http://localhost:8080", "https://lovable.dev"],
+  credentials: true 
+}));
 
 // Ensure uploads dir exists
 const UPLOAD_DIR = path.join(__dirname, "uploads");
