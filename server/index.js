@@ -5,53 +5,37 @@ const cors = require("cors");
 const multer = require("multer");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 8080;
 
-// Allow both Lovable preview (8080) and local Vite dev server (5173) to call this API
-app.use(cors({ 
-  origin: ["http://localhost:5173", "http://localhost:8080", "https://lovable.dev"],
-  credentials: true 
-}));
+app.use(cors());
+app.options("*", cors());
 
-// Ensure uploads dir exists
 const UPLOAD_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// Multer storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    // Keep original filename; consider generating unique names in real apps
-    cb(null, file.originalname);
-  },
+  filename: (req, file, cb) => cb(null, file.originalname)
 });
-
-// Allow only .txt and .pdf
 const fileFilter = (req, file, cb) => {
-  const allowed = ["application/pdf", "text/plain"];
-  if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error("Only .txt and .pdf files are allowed"));
+  const ok = ["application/pdf", "text/plain"].includes(file.mimetype)
+          || file.originalname.toLowerCase().endsWith(".pdf")
+          || file.originalname.toLowerCase().endsWith(".txt");
+  cb(ok ? null : new Error("Only .txt and .pdf files are allowed"), ok);
 };
-
-// 10 MB per file (adjust as needed)
 const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 
-// Upload endpoint (multiple files)
 app.post("/upload", upload.array("files"), (req, res) => {
-  const saved = (req.files || []).map((f) => ({
+  const files = (req.files || []).map(f => ({
     filename: f.originalname,
     size: f.size,
-    url: `/files/${encodeURIComponent(f.originalname)}`,
+    url: `/files/${encodeURIComponent(f.originalname)}`
   }));
-  res.json({ ok: true, files: saved });
+  res.json({ ok: true, files });
 });
 
-// Serve uploaded files statically
 app.use("/files", express.static(UPLOAD_DIR));
 
-// List uploaded files
 app.get("/files", (req, res) => {
   fs.readdir(UPLOAD_DIR, (err, items) => {
     if (err) return res.status(500).json({ ok: false, error: err.message });
@@ -60,10 +44,7 @@ app.get("/files", (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  // Multer or other errors
   res.status(400).json({ ok: false, error: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`Upload server listening on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Upload server listening on http://localhost:${PORT}`));

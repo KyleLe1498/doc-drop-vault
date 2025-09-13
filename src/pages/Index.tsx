@@ -1,7 +1,3 @@
 import FileUpload from "@/components/FileUpload";
-
-const Index = () => {
-  return <FileUpload />;
-};
-
+const Index = () => <FileUpload />;
 export default Index;
